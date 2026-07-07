@@ -32,6 +32,9 @@ def main():
         print(f"Empresa: {job.company}")
         print(f"Cargo: {job.title}")
         print(f"Match: {result.score}%")
+        print(f"Skills encontradas: {result.strengths}")
+        print(f"Recomendação: {result.recommendation}")
+        print(f"Prioridade: {result.priority}")
 
         database.save(
             job,

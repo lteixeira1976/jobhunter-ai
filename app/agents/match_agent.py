@@ -1,5 +1,6 @@
-from app.models.profile import luciano_profile
 from app.models.match_result import MatchResult
+from app.models.skill_priority import SKILL_PRIORITY
+from app.models.skill_aliases import SKILL_ALIASES
 
 
 class MatchAgent:
@@ -18,28 +19,55 @@ class MatchAgent:
         gaps = []
 
 
-        for skill in luciano_profile.skills:
+        total_points = 0
 
-            if skill.lower() in text:
+        max_points = 100
+
+
+        for skill, weight in SKILL_PRIORITY.items():
+
+            aliases = SKILL_ALIASES.get(
+                skill,
+                [skill]
+            )
+
+
+            found = False
+
+
+            for alias in aliases:
+
+                if alias.lower() in text:
+
+                    found = True
+                    break
+
+
+            if found:
+
+                total_points += weight
                 strengths.append(skill)
 
 
-        total_skills = len(luciano_profile.skills)
 
         score = int(
-            (len(strengths) / total_skills) * 100
+            (total_points / max_points) * 100
         )
+        if score > 100:
+            score = 100
 
 
-        if score >= 70:
+        if score >= 60:
 
             recommendation = "APLICAR"
             priority = "ALTA"
+
 
         elif score >= 40:
 
             recommendation = "AVALIAR"
             priority = "MEDIA"
+
 
         else:
 
@@ -47,15 +75,17 @@ class MatchAgent:
             priority = "BAIXA"
 
 
+
         return MatchResult(
 
             score=score,
 
-            strengths=strengths,
+            strengths=list(set(strengths)),
 
             gaps=gaps,
 
             recommendation=recommendation,
 
             priority=priority
+
         )
