@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
@@ -10,3 +11,4 @@ class Job:
     location: str
     source: str
     description: str
+    published_at: datetime = None

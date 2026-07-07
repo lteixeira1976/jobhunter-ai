@@ -1,44 +1,21 @@
-from app.models.job import Job
+from app.sources.greenhouse_source import GreenhouseSource
 
 
 class JobCollectorAgent:
 
     def __init__(self):
-        self.name = "Job Collector Agent"
 
+        self.sources = [
+            GreenhouseSource()
+        ]
 
     def search(self, keyword):
 
         print(f"🔎 Buscando vagas para: {keyword}")
 
-        jobs = [
+        jobs = []
 
-            Job(
-                title="Engineering Manager",
-                company="Mercado Livre",
-                url="https://careers.mercadolibre.com",
-                location="Remoto",
-                source="Career Site",
-                description="""
-                Liderança de times de engenharia,
-                Java, APIs, arquitetura,
-                AWS, SNS, SQS e mensageria.
-                """
-            ),
-
-            Job(
-                title="Technical Product Manager Senior",
-                company="Mottu",
-                url="https://mottu.com.br/carreiras",
-                location="São Paulo",
-                source="Career Site",
-                description="""
-                Gestão de produtos digitais,
-                roadmap, tecnologia,
-                APIs, métricas e integrações.
-                """
-            )
-
-        ]
+        for source in self.sources:
+            jobs.extend(source.search(keyword))
 
         return jobs
