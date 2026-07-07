@@ -87,10 +87,10 @@ luciano_profile = ProfessionalProfile(
 
     ],
 
-    roles=[
+       roles=[
         "Engineering Manager",
         "Technical Product Manager",
         "Tech Manager",
-        "Gerente de engenharia de software"
-    
+        "Gerente de Engenharia de Software"
+    ]
 )
