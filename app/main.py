@@ -20,7 +20,9 @@ def main():
     print("=" * 50)
     print("🚀 JobHunter AI iniciado")
     print("=" * 50)
-    print(f"Data: {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(
+        f"Data: {current_time.strftime('%Y-%m-%d %H:%M:%S')}"
+    )
     print()
 
 
@@ -41,7 +43,9 @@ def main():
         "Tech Manager",
         "Technical Product Manager Senior",
         "Software Engineering Manager",
-        "Engineering Lead"
+        "Engineering Lead",
+        "Gerente de Engenharia",
+        "Gerente de Tecnologia"
 
     ]
 
@@ -49,28 +53,59 @@ def main():
     jobs = []
 
 
+    print("🔎 Iniciando busca de vagas")
+    print()
+
+
     for term in search_terms:
 
-        print(f"🔎 Buscando vagas para: {term}")
-
-        jobs.extend(
-            collector.search(term)
+        print(
+            f"🔎 Buscando vagas para: {term}"
         )
 
+        results = collector.search(term)
 
-    # Remove possíveis duplicadas pelo título + empresa
+        print(
+            f"   Encontradas: {len(results)}"
+        )
+
+        jobs.extend(results)
+
+
+
+    print()
+    print(
+        f"Total bruto encontrado: {len(jobs)}"
+    )
+
+
+    # Remove duplicidades
 
     unique_jobs = {}
 
+
     for job in jobs:
 
-        key = f"{job.company}-{job.title}"
+        key = (
+            f"{job.company}-"
+            f"{job.title}-"
+            f"{job.url}"
+        )
+
 
         unique_jobs[key] = job
 
 
+
     jobs = list(unique_jobs.values())
 
+
+    print(
+        f"Após remover duplicadas: {len(jobs)}"
+    )
+
+
+    # Filtro últimos 7 dias
 
     jobs = filter_service.filter_recent(
         jobs,
@@ -79,11 +114,14 @@ def main():
 
 
     print(
-        f"Vagas encontradas últimos 7 dias: {len(jobs)}"
+        f"Após filtro 7 dias: {len(jobs)}"
     )
 
 
     matches = []
+
+    relevant_count = 0
+    ignored_count = 0
 
 
     for job in jobs:
@@ -93,7 +131,18 @@ def main():
 
 
         if not relevance_result["relevant"]:
+
+            ignored_count += 1
+
+            print(
+                f"❌ Ignorada: {job.title}"
+            )
+
             continue
+
+
+
+        relevant_count += 1
 
 
         job.description = detail_service.get_description(
@@ -102,6 +151,7 @@ def main():
 
 
         result = matcher.calculate(job)
+
 
 
         matches.append(
@@ -113,15 +163,29 @@ def main():
         )
 
 
+
         database.save(
             job,
             result.score
         )
 
 
+
+    print()
+    print(
+        f"✅ Vagas relevantes: {relevant_count}"
+    )
+
+    print(
+        f"❌ Vagas ignoradas: {ignored_count}"
+    )
+
+
+
     ranked_jobs = ranking.rank(
         matches
     )
+
 
 
     print()
@@ -130,7 +194,9 @@ def main():
     print("=" * 50)
 
 
+
     for item in ranked_jobs[:10]:
+
 
         job = item["job"]
         result = item["result"]
@@ -139,19 +205,62 @@ def main():
 
         print()
         print("-----------------------")
-        print(f"Empresa: {job.company}")
-        print(f"Cargo: {job.title}")
-        print(f"Prioridade cargo: {relevance_result['score']}")
-        print(f"Ranking final: {item['ranking_score']:.1f}")
-        print(f"Categoria: {relevance_result['category']}")
-        print(f"Match: {result.score}%")
-        print(f"Skills: {result.strengths}")
-        print(f"Recomendação: {result.recommendation}")
-        print(f"Prioridade: {result.priority}")
+        print(
+            f"Empresa: {job.company}"
+        )
+
+        print(
+            f"Cargo: {job.title}"
+        )
+
+        print(
+            f"Link: {job.url}"
+        )
+
+        print(
+            f"Fonte: {job.source}"
+        )
+
+        print(
+            f"Localização: {job.location}"
+        )
+
+        print(
+            f"Publicado: {job.published_at}"
+        )
+
+        print(
+            f"Prioridade cargo: {relevance_result['score']}"
+        )
+
+        print(
+            f"Ranking final: {item['ranking_score']:.1f}"
+        )
+
+        print(
+            f"Categoria: {relevance_result['category']}"
+        )
+
+        print(
+            f"Match: {result.score}%"
+        )
+
+        print(
+            f"Skills: {result.strengths}"
+        )
+
+        print(
+            f"Recomendação: {result.recommendation}"
+        )
+
+        print(
+            f"Prioridade: {result.priority}"
+        )
 
 
     print()
     print("✅ Vagas salvas no banco")
+
 
 
 if __name__ == "__main__":

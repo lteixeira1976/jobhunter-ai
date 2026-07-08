@@ -1,4 +1,5 @@
 from app.sources.greenhouse_source import GreenhouseSource
+from app.sources.gupy_source import GupySource
 
 
 class JobCollectorAgent:
@@ -6,7 +7,8 @@ class JobCollectorAgent:
     def __init__(self):
 
         self.sources = [
-            GreenhouseSource()
+            GreenhouseSource(),
+            GupySource()
         ]
 
     def search(self, keyword):
@@ -16,6 +18,18 @@ class JobCollectorAgent:
         jobs = []
 
         for source in self.sources:
-            jobs.extend(source.search(keyword))
 
-        return jobs
+            try:
+                jobs.extend(source.search(keyword))
+
+            except Exception as e:
+                print(f"Erro em {source.__class__.__name__}: {e}")
+
+        unique_jobs = {}
+
+        for job in jobs:
+
+            if job.url:
+                unique_jobs[job.url] = job
+
+        return list(unique_jobs.values())
