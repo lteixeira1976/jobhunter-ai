@@ -1,6 +1,6 @@
 import requests
-from bs4 import BeautifulSoup
-from datetime import datetime, timezone
+from datetime import datetime
+from typing import List
 
 from app.models.job import Job
 from app.sources.base_source import JobSource
@@ -8,70 +8,77 @@ from app.sources.base_source import JobSource
 
 class GupySource(JobSource):
 
-    def __init__(self):
-        self.name = "Gupy"
+    BASE_URL = "https://employability-portal.gupy.io/api/v1/jobs"
 
-    def search(self, keyword):
+    def __init__(self, page_limit: int = 50):
+        self.page_limit = page_limit
 
-        jobs = []
+    def search(self, keyword: str) -> List[Job]:
+        jobs: List[Job] = []
+        offset = 0
 
-        query = keyword.replace(" ", "%20")
+        while True:
+            params = {
+                "jobName": keyword,
+                "limit": self.page_limit,
+                "offset": offset,
+            }
 
-        url = f"https://portal.gupy.io/job-search/term={query}"
+            try:
+                response = requests.get(
+                    self.BASE_URL,
+                    params=params,
+                    headers={"User-Agent": "Mozilla/5.0"},
+                    timeout=30,
+                )
+                response.raise_for_status()
+            except requests.RequestException as error:
+                print(f"Erro ao consultar Gupy: {error}")
+                break
 
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
+            payload = response.json()
+            items = payload.get("data", [])
+            pagination = payload.get("pagination", {})
 
-        try:
-            response = requests.get(
-                url,
-                headers=headers,
-                timeout=10
-            )
+            if not items:
+                break
 
-            response.raise_for_status()
+            for item in items:
+                published_at = None
+                published_date = item.get("publishedDate")
 
-            soup = BeautifulSoup(
-                response.text,
-                "html.parser"
-            )
+                if published_date:
+                    try:
+                        published_at = datetime.fromisoformat(
+                            published_date.replace("Z", "+00:00")
+                        )
+                    except ValueError:
+                        pass
 
-            links = soup.find_all("a", href=True)
+                city = item.get("city", "")
+                state = item.get("state", "")
+                country = item.get("country", "")
 
-            for link in links:
-
-                href = link.get("href")
-
-                if not href:
-                    continue
-
-                if "/jobs/" not in href:
-                    continue
-
-                title = link.text.strip()
-
-                if not title:
-                    title = keyword
-
-                if href.startswith("/"):
-                    job_url = f"https://portal.gupy.io{href}"
-                else:
-                    job_url = href
+                location = ", ".join(
+                    part for part in [city, state, country] if part
+                )
 
                 jobs.append(
                     Job(
-                        title=title,
-                        company="Não identificado",
-                        url=job_url,
-                        location="Brasil",
-                        source=self.name,
-                        description=title,
-                        published_at=datetime.now(timezone.utc)
+                        title=item.get("name", ""),
+                        company=item.get("careerPageName", ""),
+                        url=item.get("jobUrl", ""),
+                        location=location,
+                        source="Gupy",
+                        description=item.get("description", ""),
+                        published_at=published_at,
                     )
                 )
 
-        except Exception as e:
-            print(f"Erro Gupy Search: {e}")
+            total = pagination.get("total", 0)
+            offset += self.page_limit
+
+            if offset >= total:
+                break
 
         return jobs
