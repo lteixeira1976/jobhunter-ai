@@ -1,43 +1,47 @@
 CANDIDATE_PROFILE = {
     "name": "Luciano Teixeira",
 
-    "target_roles": {
-        "tier_1": {
-            "weight": 100,
-            "roles": [
-                "Engineering Manager",
-                "Software Engineering Manager",
-                "Senior Engineering Manager",
-                "Tech Manager",
-                "Technology Manager",
-                "Head of Engineering",
-                "Gerente de Engenharia",
-                "Gerente de Engenharia de Software",
-                "Gerente de Tecnologia",
-            ],
-        },
+   "target_roles": {
+    "tier_1": {
+        "weight": 100,
+        "roles": [
+            "Engineering Manager",
+            "Software Engineering Manager",
+            "Senior Engineering Manager",
+            "Engineering Director",
+            "Tech Manager",
+            "Technology Manager",
+            "IT Manager",
+            "Head of Engineering",
+            "Head of Technology",
+            "Head de Engenharia",
+            "Head de Tecnologia",
+            "Gerente de Engenharia",
+            "Gerente de Engenharia de Software",
+            "Gerente de Desenvolvimento",
+            "Gerente de Desenvolvimento de Software",
+            "Gerente de Tecnologia",
+            "Gerente de TI",
+            "Gerente de Sistemas",
 
-        "tier_2": {
-            "weight": 90,
-            "roles": [
-                "Technical Product Manager",
-                "Senior Technical Product Manager",
-                "Technical Program Manager",
-                "Platform Manager",
-                "Digital Product Manager",
-                "Group Product Manager",
-            ],
-        },
-
-        "tier_3": {
-            "weight": 75,
-            "roles": [
-                "Engineering Lead",
-                "Tech Lead",
-                "Principal Engineer",
-            ],
-        },
+            "Technical Product Manager",
+            "Senior Technical Product Manager",
+            "Technical Program Manager",
+            "Platform Manager",
+            "Digital Product Manager",
+            "Group Product Manager",
+        ],
     },
+
+    "tier_3": {
+        "weight": 75,
+        "roles": [
+            "Engineering Lead",
+            "Tech Lead",
+            "Principal Engineer",
+        ],
+    },
+},
 
     "excluded_roles": [
         "Software Engineer",
@@ -96,7 +100,7 @@ CANDIDATE_PROFILE = {
     },
 
     "search": {
-        "days": 7,
+        "days": 15,
         "minimum_match_score": 40,
         "minimum_ranking_score": 60,
         "maximum_results": 10,
