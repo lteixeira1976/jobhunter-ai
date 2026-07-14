@@ -1,0 +1,104 @@
+CANDIDATE_PROFILE = {
+    "name": "Luciano Teixeira",
+
+    "target_roles": {
+        "tier_1": {
+            "weight": 100,
+            "roles": [
+                "Engineering Manager",
+                "Software Engineering Manager",
+                "Senior Engineering Manager",
+                "Tech Manager",
+                "Technology Manager",
+                "Head of Engineering",
+                "Gerente de Engenharia",
+                "Gerente de Engenharia de Software",
+                "Gerente de Tecnologia",
+            ],
+        },
+
+        "tier_2": {
+            "weight": 90,
+            "roles": [
+                "Technical Product Manager",
+                "Senior Technical Product Manager",
+                "Technical Program Manager",
+                "Platform Manager",
+                "Digital Product Manager",
+                "Group Product Manager",
+            ],
+        },
+
+        "tier_3": {
+            "weight": 75,
+            "roles": [
+                "Engineering Lead",
+                "Tech Lead",
+                "Principal Engineer",
+            ],
+        },
+    },
+
+    "excluded_roles": [
+        "Software Engineer",
+        "Senior Software Engineer",
+        "Staff Engineer",
+        "Technical Support",
+        "Support Lead",
+        "Scrum Master",
+        "Product Owner",
+        "Engineering Intern",
+        "Estágio",
+        "Trainee",
+        "Júnior",
+        "Junior",
+    ],
+
+    "preferred_locations": [
+        "São Paulo",
+        "São Paulo - SP",
+        "Brasil",
+        "Brazil",
+        "Remoto",
+        "Remote",
+        "Híbrido",
+        "Hybrid",
+    ],
+
+    "skills": {
+        "people management": 15,
+        "engineering management": 15,
+        "product management": 10,
+        "stakeholders": 8,
+        "roadmap": 8,
+        "discovery": 8,
+        "apis": 8,
+        "microsserviços": 8,
+        "mensageria": 8,
+        "aws": 8,
+        "java": 6,
+        "python": 5,
+        "spring boot": 6,
+        "kafka": 6,
+        "rabbitmq": 6,
+        "sns": 5,
+        "sqs": 5,
+        "devops": 5,
+        "devsecops": 5,
+        "observabilidade": 5,
+        "inteligência artificial": 6,
+        "ia generativa": 6,
+        "crm": 5,
+        "e-commerce": 5,
+        "omnichannel": 5,
+        "zendesk": 4,
+        "whatsapp": 4,
+    },
+
+    "search": {
+        "days": 7,
+        "minimum_match_score": 40,
+        "minimum_ranking_score": 60,
+        "maximum_results": 10,
+    },
+}

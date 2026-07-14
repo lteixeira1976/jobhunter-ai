@@ -5,7 +5,7 @@ from app.agents.match_agent import MatchAgent
 from app.agents.ranking_agent import RankingAgent
 from app.agents.job_relevance_agent import JobRelevanceAgent
 
-from app.config.search_config import SEARCH_CONFIG
+from app.config.candidate_profile import CANDIDATE_PROFILE
 from app.database.database import JobDatabase
 
 from app.services.job_detail_service import JobDetailService
@@ -15,8 +15,8 @@ from app.services.job_filter_service import JobFilterService
 def build_search_terms():
     search_terms = []
 
-    for position_group in SEARCH_CONFIG["positions"].values():
-        search_terms.extend(position_group)
+    for tier in CANDIDATE_PROFILE["target_roles"].values():
+        search_terms.extend(tier["roles"])
 
     return list(dict.fromkeys(search_terms))
 
@@ -35,24 +35,24 @@ def main():
     filter_service = JobFilterService()
 
     search_terms = build_search_terms()
-    days_filter = SEARCH_CONFIG["days"]
+
+    search_config = CANDIDATE_PROFILE["search"]
+    days_filter = search_config["days"]
+    maximum_results = search_config["maximum_results"]
+    minimum_match_score = search_config["minimum_match_score"]
+
+    jobs = []
 
     print("=" * 60)
     print("🚀 JOBHUNTER AI")
     print("=" * 60)
-    print(
-        f"Execução: {current_time.strftime('%d/%m/%Y %H:%M')}"
-    )
-    print(
-        f"Período analisado: últimos {days_filter} dias"
-    )
+    print(f"Candidato: {CANDIDATE_PROFILE['name']}")
+    print(f"Execução: {current_time.strftime('%d/%m/%Y %H:%M')}")
+    print(f"Período analisado: últimos {days_filter} dias")
     print()
 
-    jobs = []
-
     for term in search_terms:
-        results = collector.search(term)
-        jobs.extend(results)
+        jobs.extend(collector.search(term))
 
     total_collected = len(jobs)
 
@@ -107,7 +107,7 @@ def main():
             {
                 "job": job,
                 "result": result,
-                "relevance": relevance_result
+                "relevance": relevance_result,
             }
         )
 
@@ -118,11 +118,18 @@ def main():
 
     ranked_jobs = ranking.rank(matches)
 
-    # Só exibe vagas com recomendação APLICAR ou AVALIAR.
-    recommended_jobs = [
+    priority_jobs = [
         item
         for item in ranked_jobs
-        if item["result"].priority in {"ALTA", "MEDIA"}
+        if item["relevance"]["score"] >= 90
+        and item["result"].score >= minimum_match_score
+    ]
+
+    fallback_jobs = [
+        item
+        for item in ranked_jobs
+        if 70 <= item["relevance"]["score"] < 90
+        and item["result"].score >= minimum_match_score
     ]
 
     print("RESUMO")
@@ -131,19 +138,20 @@ def main():
     print(f"Vagas únicas:          {total_unique}")
     print(f"Vagas recentes:        {total_recent}")
     print(f"Vagas fora do perfil:  {ignored_count}")
-    print(f"Vagas recomendadas:    {len(recommended_jobs)}")
+    print(f"Vagas prioritárias:    {len(priority_jobs)}")
+    print(f"Vagas alternativas:    {len(fallback_jobs)}")
     print()
 
     print("=" * 60)
-    print("🏆 MELHORES OPORTUNIDADES")
+    print("🏆 OPORTUNIDADES PRIORITÁRIAS")
     print("=" * 60)
 
-    if not recommended_jobs:
+    if not priority_jobs:
         print()
-        print("Nenhuma oportunidade recomendada nesta execução.")
+        print("Nenhuma oportunidade prioritária nesta execução.")
 
     for index, item in enumerate(
-        recommended_jobs[:10],
+        priority_jobs[:maximum_results],
         start=1
     ):
         job = item["job"]
@@ -158,9 +166,33 @@ def main():
         print(f"   Ranking: {item['ranking_score']:.1f}")
         print(f"   Recomendação: {result.recommendation}")
         print(
-            f"   Skills aderentes: "
+            "   Skills aderentes: "
             f"{', '.join(result.strengths) or 'Não identificadas'}"
         )
+        print(f"   Link: {job.url}")
+
+    print()
+    print("=" * 60)
+    print("🟡 OPORTUNIDADES ALTERNATIVAS")
+    print("=" * 60)
+
+    if not fallback_jobs:
+        print()
+        print("Nenhuma oportunidade alternativa nesta execução.")
+
+    for index, item in enumerate(
+        fallback_jobs[:3],
+        start=1
+    ):
+        job = item["job"]
+        result = item["result"]
+
+        print()
+        print(f"{index}. {job.title}")
+        print(f"   Empresa: {job.company}")
+        print(f"   Localização: {job.location or 'Não informada'}")
+        print(f"   Match: {result.score}%")
+        print(f"   Recomendação: {result.recommendation}")
         print(f"   Link: {job.url}")
 
     print()
