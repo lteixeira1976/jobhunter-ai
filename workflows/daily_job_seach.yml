@@ -1,0 +1,43 @@
+from datetime import datetime
+from pathlib import Path
+import subprocess
+import sys
+
+
+def main() -> None:
+    print("=" * 60)
+    print("JOBHUNTER AI — GERANDO ARQUIVO DE VAGAS")
+    print("=" * 60)
+
+    output_dir = Path("output")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    data_hora = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    arquivo_saida = output_dir / f"vagas_{data_hora}.txt"
+
+    resultado = subprocess.run(
+        [sys.executable, "-m", "app.main"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+    conteudo = resultado.stdout
+
+    if resultado.stderr:
+        conteudo += "\n\nERROS DA EXECUÇÃO:\n"
+        conteudo += resultado.stderr
+
+    arquivo_saida.write_text(conteudo, encoding="utf-8")
+
+    print()
+    print("Arquivo gerado com sucesso:")
+    print(arquivo_saida.resolve())
+
+    if resultado.returncode != 0:
+        print()
+        print("A busca apresentou algum erro. Consulte o TXT para detalhes.")
+
+
+if __name__ == "__main__":
+    main()
